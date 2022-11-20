@@ -1,0 +1,179 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        mc:Ignorable="d"
+        xmlns:vm="clr-namespace:WpfApp1.ViewModels"
+        xmlns:extras="clr-namespace:WpfApp1.Extras.Views"
+        Title="{Binding Model.Data.WindowTitle}" Height="450" Width="800">
+
+    <!-- Binding root -->
+    <Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
+
+    <!-- resources in this view -->
+    <Window.Resources>
+        <extras:LHConverter x:Key="LHConverterResource" />
+        <extras:BoolVisibilityConverter x:Key="BoolVisibilityConverterResource" />
+        <extras:BoolVisibilityReversedConverter x:Key="BoolVisibilityReversedConverterResource" />
+    </Window.Resources>
+    
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- 左上 -->
+        <Grid Background="Yellow">
+        </Grid>
+
+        <!-- 左下 -->
+        <Grid Grid.Row="1" Background="LightBlue">
+            <Border BorderThickness="3" BorderBrush="{Binding Model.Data.Brush01}">
+                <StackPanel Orientation="Vertical">
+                    <TextBox Width="200" Text="2022/04/01 00:00:00" IsReadOnly="True" />
+                    <TextBox Width="200" Text="{Binding Model.Data.Value01}" IsReadOnly="True" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- 右下 -->
+        <Grid Grid.Row="1" Grid.Column="1" Background="Pink">
+            <Border BorderThickness="3"  BorderBrush="{Binding Model.Data.Brush02}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <!-- ★Command sample -->
+                        <Button Grid.Column="0" Command="{Binding AddValueCommand}" CommandParameter="3" Content="Add -&gt;"></Button>
+                        <TextBox Grid.Column="1" Width="200" Text="{Binding Model.Data.ValueAdded}" IsReadOnly="True" />
+                        <!-- ★Converter sample -->
+                        <Border Grid.Column="2" BorderThickness="1">
+                            <TextBlock 
+                                   Width="200"
+                                   Background="Beige"
+                                   Text="{Binding Model.Data.ValueAdded, 
+                                   Converter={StaticResource LHConverterResource}}" />
+                        </Border>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <!-- ★Command sample -->
+                        <Button Grid.Column="0" Command="{Binding SwitchBindableCommand}" CommandParameter="{Binding}" Content="Set now -&gt;"></Button>
+                        <TextBox Grid.Column="1" Width="200" Text="{Binding Model.Data.ValueBindable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" />
+                        <!-- ★NotifyPropertyChanged sample -->
+                        <CheckBox Grid.Column="2" IsChecked="{Binding Model.Data.IsBindable}">双方向バインド</CheckBox>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="1" Text="{Binding Model.Data.SomeValue}" Width="200">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="GotFocus">
+                                    <!-- ★Extra Command sample -->
+                                    <i:InvokeCommandAction Command="{Binding EnterFocusCommand}" />
+                                </i:EventTrigger>
+                                <i:EventTrigger EventName="LostFocus">
+                                    <!-- ★Extra Command sample -->
+                                    <i:InvokeCommandAction Command="{Binding LostFocusCommand}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </TextBox>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <!-- ★UserControl, DependencyProperty sample -->
+                        <extras:LabelText Grid.Column="1"
+                                          Title="{Binding Model.Data.LabelTextTitle}"
+                                          Content="{Binding Model.Data.LabelTextContent}" />
+                    </Grid>
+                    <Grid>
+                        <TextBlock Grid.Column="0" Text="　" />
+                    </Grid>
+                    <Grid>
+                        <!-- ★DataTemplate, ItemsSource etc... sample -->
+                        <TabControl ItemsSource="{Binding Model.Data.TabPageEntities}">
+                            <TabControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </TabControl.ItemTemplate>
+                            <TabControl.ContentTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding PageContent}" >
+                                        <ScrollViewer Height="130">
+                                            <Grid>
+                                                <!-- ★Binding visibility sample -->
+                                                <Grid Margin="7"
+                                                      Background="Beige"
+                                                      Visibility="{Binding IsVisible, Converter={StaticResource BoolVisibilityConverterResource}}">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="50" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+                                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Background="Cyan">
+                                                        <TextBlock>Age :</TextBlock>
+                                                        <TextBlock Text="{Binding PageContent.Age}" />
+                                                        <TextBlock Margin="3, 0, 7, 0"> ,</TextBlock>
+                                                        <TextBlock>Sex :</TextBlock>
+                                                        <TextBlock Text="{Binding PageContent.SexType}" />
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Row="1" Orientation="Vertical" Background="Yellow">
+                                                        <TextBlock> &lt;Hobbies&gt;</TextBlock>
+                                                        <ItemsControl ItemsSource="{Binding PageContent.Hobbies}">
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding}" />
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </StackPanel>
+                                                </Grid>
+                                                <!-- ★Binding visibility sample -->
+                                                <Grid Visibility="{Binding IsVisible, Converter={StaticResource BoolVisibilityReversedConverterResource}}"
+                                                      Margin="7">
+                                                    <StackPanel Orientation="Vertical">
+                                                        <TextBlock Text="このページは非表示の設定となっています。" Foreground="OrangeRed" />
+                                                        <TextBlock Text="※DataTemplate, ItemsSource etc..." Foreground="OrangeRed" />
+                                                        <!-- ★Generic command sample -->
+                                                        <Button Content="内容をのぞき見る"
+                                                                Command="{Binding PageContent.ShowDetailAction}"
+                                                                CommandParameter="{Binding PageContent.Detail}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Grid>
+                                        </ScrollViewer>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </TabControl.ContentTemplate>
+                        </TabControl>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
